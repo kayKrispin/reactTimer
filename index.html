@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+
+
+
+          const Timer  = function(props){
+            return(
+              <h1>
+                  {props.formated(props.time)}
+              </h1>
+            )
+          }
+
+          const Reset  = function(props){
+            return(
+              <button onClick = {props.onReset} className = "reset">Reset</button>
+            )
+          }
+          const Lap  = function(props){
+            return(
+              <button onClick = {props.onLap} className = "lap">Lap</button>
+            )
+          }
+
+          class Controller extends React.Component {
+
+              constructor(props){
+                super(props);
+              }
+
+            onClickHandler = () =>{
+              if(this.props.paused){
+                this.props.start();
+              }else{
+                this.props.stop();
+              }
+            }
+
+            render(){
+              return(
+                  <button onClick = {this.onClickHandler} className = {this.props.paused ? "paused" :""}>
+                      {this.props.paused ? "start":"pause"}
+                  </button>
+              )
+            }
+          }
+
+
+          class App extends React.Component{
+
+            constructor(props){
+              super(props);
+                this.state = {timer:0,paused:true,laps:[]}
+            }
+
+            tick = () =>{
+              this.setState(prevState=>({
+                timer:prevState.timer  + 1
+              }))
+            }
+
+            startTimer = () =>{
+              this.interval  = setInterval(this.tick,1000);
+              this.setState({
+                paused:false
+              })
+            }
+
+            stopTimer  = () =>{
+              clearInterval(this.interval)
+              this.setState({
+                paused:true
+              })
+            }
+
+            resetTimer = ()=>{
+              clearInterval(this.inteval);
+              this.setState({
+                paused:true,
+                timer:0,
+                laps:[]
+              })
+            }
+
+            setLap = () =>{
+              this.setState({
+                laps:this.state.laps.concat([this.state.timer])
+              })
+            }
+
+            getSeconds = () =>{
+              return ('0' + this.state.timer % 60).slice(-2);
+            }
+            getMinutes = () =>{
+              return Math.floor(this.state.timer/60);
+            }
+
+            formatedSeconds = (secs) =>{
+              let seconds = ('0' + secs % 60).slice(-2);
+              let minutes = Math.floor(secs/60);
+
+              return `${minutes} : ${seconds}`;
+            }
+
+            render(){
+              return(
+                <div>
+
+                    <Timer formated = {this.formatedSeconds}  time = {this.state.timer}/>
+                    <Controller
+                    paused = {this.state.paused}
+                    start = {this.startTimer}
+                    stop = {this.stopTimer}
+                    />
+                    <Reset onReset = {this.resetTimer} />
+                    <Lap onLap = {this.setLap} />
+                    <ul>
+                      {this.state.laps.map((lap,i)=>{
+                      return  <li ><strong>{i +1}</strong>/ {this.formatedSeconds(lap)}</li>
+                      })}
+                    </ul>
+                </div>
+
+              );
+            };
+          };
+
+
+
+
+      ReactDOM.render(
+        <App />,
+        document.getElementById('root')
+      );
+
+    </script>
+
+  </body>
+</html>
+
+<style media="screen">
+  #root{
+    height: 400px;
+    background: #f8f8f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  button{
+    min-width: 100px;
+    height: 20px;
+    outline: none;
+    border:0;
+    padding 10px;
+    text-transform: uppercase;
+    color: white;
+    background: #f44336;
+    cursor: pointer;
+    transition: all .4s ease-in-out;
+  }
+  .paused{
+    background: #50c950;
+  }
+  .reset{
+    margin-left: 10px;
+    background: orange;
+
+
+  }
+  .lap{
+    margin-left: 10px;
+    background: blue;
+  }
+</style>
